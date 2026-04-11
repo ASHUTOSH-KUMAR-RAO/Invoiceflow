@@ -163,7 +163,7 @@ Open [http://localhost:3000](http://localhost:3000) 🎉
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) first.
+Contributions are welcome! Please read [CONTRIBUTING.MD](./CONTRIBUTING.MD) first.
 
 ```bash
 # Fork → Create a feature branch → Submit a PR
