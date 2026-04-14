@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -27,12 +28,15 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  if (pathname.startsWith("/dashboard")) return null;
 
   return (
     <motion.nav
@@ -45,7 +49,6 @@ export default function Navbar() {
     >
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
 
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
           <Image
             src="/logo.jpeg"
@@ -59,30 +62,27 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Center Links */}
         <div className="hidden md:flex items-center gap-8">
           {isLoggedIn ? (
-            // Logged in links
             <>
               <Link href="/dashboard" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors">
                 <LayoutDashboard className="w-3.5 h-3.5" />
                 Dashboard
               </Link>
-              <Link href="/invoices" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors">
+              <Link href="/dashboard/invoices" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors">
                 <FileText className="w-3.5 h-3.5" />
                 Invoices
               </Link>
-              <Link href="/clients" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors">
+              <Link href="/dashboard/clients" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors">
                 <Users className="w-3.5 h-3.5" />
                 Clients
               </Link>
-              <Link href="/expenses" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors">
+              <Link href="/dashboard/expenses" className="flex items-center gap-1.5 text-white/50 hover:text-white text-sm transition-colors">
                 <TrendingUp className="w-3.5 h-3.5" />
                 Expenses
               </Link>
             </>
           ) : (
-            // Logged out links
             <>
               {["Features", "Pricing", "FAQ"].map((item) => (
                 <a key={item} href={`#${item.toLowerCase()}`}
@@ -94,10 +94,8 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Right Side */}
         <div className="flex items-center gap-3">
           {isLoggedIn ? (
-            // User dropdown
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
@@ -122,7 +120,7 @@ export default function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/settings" className="text-white/70 hover:text-white cursor-pointer">
+                  <Link href="/dashboard/settings" className="text-white/70 hover:text-white cursor-pointer">
                     <FileText className="w-4 h-4 mr-2" /> Settings
                   </Link>
                 </DropdownMenuItem>
@@ -134,7 +132,6 @@ export default function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            // Auth buttons
             <>
               <Button variant="ghost" asChild className="text-white/70 hover:text-white hover:bg-white/5">
                 <Link href="/login">Log in</Link>
