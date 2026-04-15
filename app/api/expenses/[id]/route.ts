@@ -3,18 +3,20 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 
 // PATCH - expense update karo
+// PATCH
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;  // await karo
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const expense = await prisma.expense.findFirst({
-      where: { id: params.id, userId: session.user.id },
+      where: { id, userId: session.user.id },
     });
 
     if (!expense) {
@@ -25,7 +27,7 @@ export async function PATCH(
     const { title, amount, category, date, description, isDeductible } = body;
 
     const updated = await prisma.expense.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title,
         amount: parseFloat(amount),
@@ -42,26 +44,27 @@ export async function PATCH(
   }
 }
 
-// DELETE - expense delete karo
+// DELETE
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;  // await karo
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const expense = await prisma.expense.findFirst({
-      where: { id: params.id, userId: session.user.id },
+      where: { id, userId: session.user.id },
     });
 
     if (!expense) {
       return NextResponse.json({ error: "Expense nahi mila" }, { status: 404 });
     }
 
-    await prisma.expense.delete({ where: { id: params.id } });
+    await prisma.expense.delete({ where: { id } });
 
     return NextResponse.json({ message: "Expense delete ho gaya" });
   } catch (error) {
