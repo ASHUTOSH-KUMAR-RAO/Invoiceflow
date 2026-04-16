@@ -19,6 +19,7 @@ import {
   LogOut,
   ChevronDown,
   Bell,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -160,13 +161,20 @@ function TopBar({ collapsed }: { collapsed: boolean }) {
       className="fixed top-0 right-0 h-16 z-30 flex items-center justify-between px-6 border-b border-white/5 bg-[#0a0a0a]/95 backdrop-blur-md"
       style={{ left: 0 }}
     >
-      <div style={{ marginLeft: collapsed ? 72 : 240 }} className="transition-all duration-300">
+      <div
+        style={{ marginLeft: collapsed ? 72 : 240 }}
+        className="transition-all duration-300"
+      >
         <h1 className="text-white font-semibold text-lg">{getPageTitle()}</h1>
       </div>
 
       <div className="flex items-center gap-3">
         {/* New Invoice Button */}
-        <Button asChild size="sm" className="bg-[#1a472a] hover:bg-[#1a472a]/80 text-white rounded-lg gap-1.5">
+        <Button
+          asChild
+          size="sm"
+          className="bg-[#1a472a] hover:bg-[#1a472a]/80 text-white rounded-lg gap-1.5"
+        >
           <Link href="/dashboard/invoices/new">
             <Plus className="w-4 h-4" /> New Invoice
           </Link>
@@ -191,25 +199,48 @@ function TopBar({ collapsed }: { collapsed: boolean }) {
               <ChevronDown className="w-3.5 h-3.5 text-white/30" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52 bg-[#0f1f14] border-white/10">
+          <DropdownMenuContent
+            align="end"
+            className="w-52 bg-[#0f1f14] border-white/10"
+          >
             <div className="px-3 py-2.5">
-              <p className="text-white text-sm font-medium">{session?.user?.name}</p>
-              <p className="text-white/40 text-xs truncate mt-0.5">{session?.user?.email}</p>
+              <p className="text-white text-sm font-medium">
+                {session?.user?.name}
+              </p>
+              <p className="text-white/40 text-xs truncate mt-0.5">
+                {session?.user?.email}
+              </p>
             </div>
             <DropdownMenuSeparator className="bg-white/10" />
             <DropdownMenuItem asChild>
-              <Link href="/dashboard" className="text-white/70 hover:text-white cursor-pointer gap-2">
+              <Link
+                href="/dashboard"
+                className="text-white/70 hover:text-white cursor-pointer gap-2"
+              >
                 <LayoutDashboard className="w-4 h-4" /> Dashboard
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/settings" className="text-white/70 hover:text-white cursor-pointer gap-2">
+              <Link
+                href="/dashboard/profile"
+                className="text-white/70 hover:text-white cursor-pointer gap-2"
+              >
+                <User className="w-4 h-4" /> Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                href="/dashboard/settings"
+                className="text-white/70 hover:text-white cursor-pointer gap-2"
+              >
                 <Settings className="w-4 h-4" /> Settings
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}
-              className="text-red-400 hover:text-red-300 cursor-pointer gap-2">
+            <DropdownMenuItem
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="text-red-400 hover:text-red-300 cursor-pointer gap-2"
+            >
               <LogOut className="w-4 h-4" /> Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>

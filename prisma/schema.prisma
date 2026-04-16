@@ -37,6 +37,15 @@ model User {
   plan          Plan       @default(FREE)
   planExpiresAt DateTime?
 
+ // Notification Preferences
+  notifyEmail    Boolean   @default(true)
+  notifyWhatsapp Boolean   @default(false)
+
+  // Email Change
+  pendingEmail        String?
+  emailChangeToken    String?
+  emailChangeExpiry   DateTime?
+
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
