@@ -4,6 +4,7 @@ import { Providers } from "@/components/providers";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { Toaster } from "sonner";
+import { SessionProvider } from "next-auth/react";
 
 const syne = Syne({
   subsets: ["latin"],
@@ -46,11 +47,11 @@ export default function RootLayout({
       <body
         className={`${syne.variable} ${dmSans.variable} font-sans antialiased`}
       >
-        <Providers>
+        <SessionProvider>
           <Navbar />
           {children}
           <Toaster richColors position="top-right" />
-        </Providers>
+        </SessionProvider>
       </body>
     </html>
   );
