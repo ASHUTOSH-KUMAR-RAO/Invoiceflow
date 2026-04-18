@@ -1,18 +1,19 @@
 # InvoiceFlow 🧾
 
-> India's smartest invoicing tool for freelancers — GST-ready, UPI-powered, WhatsApp-friendly.
+> India's smartest invoicing tool for freelancers — GST-ready, UPI-powered, WhatsApp-friendly, and now AI-powered.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
 ![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?style=flat-square&logo=prisma)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38B2AC?style=flat-square&logo=tailwind-css)
+![Claude AI](https://img.shields.io/badge/Claude_AI-Anthropic-orange?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 ---
 
 ## 🚀 What is InvoiceFlow?
 
-InvoiceFlow is a **production-ready SaaS tool** built for Indian freelancers. Say goodbye to Excel — get a clean, fast, and professional invoicing experience with full GST support, UPI QR codes, and WhatsApp sharing built right in.
+InvoiceFlow is a **production-ready SaaS tool** built for Indian freelancers. Say goodbye to Excel — get a clean, fast, and professional invoicing experience with full GST support, UPI QR codes, WhatsApp sharing, and an AI assistant built right in.
 
 ---
 
@@ -30,6 +31,54 @@ InvoiceFlow is a **production-ready SaaS tool** built for Indian freelancers. Sa
 | 🎨 Custom Templates | 6+ designs with logo and brand color support |
 | 🔗 Client Portal | Secure link for clients to view their invoices |
 | 💰 Expense Tracker | Track expenses and view net profit |
+| 🤖 AI Invoice Assistant | Ask questions about your revenue, clients, and invoices in plain English |
+| ✍️ AI Reminder Writer | Auto-generate professional payment reminder messages |
+| 💡 Smart Item Suggestions | AI suggests items, rates, and HSN codes based on past invoices |
+
+---
+
+## 🤖 AI Features (Powered by Claude)
+
+InvoiceFlow uses **Anthropic's Claude AI** to make invoicing smarter, faster, and easier for Indian freelancers.
+
+### 1. 💬 AI Invoice Assistant (Chatbot)
+
+Ask questions about your business in plain English — no need to dig through reports manually.
+
+**Example queries:**
+- *"Rahul ka kitna payment pending hai?"*
+- *"Is month ka total revenue kitna hai?"*
+- *"Kaun sa client sabse zyada late pay karta hai?"*
+- *"Last 3 months mein kitne invoices overdue hue?"*
+
+The AI reads your real database and gives accurate, instant answers — like having a personal accountant available 24/7.
+
+---
+
+### 2. ✍️ AI Payment Reminder Writer
+
+Client ne payment nahi kiya? Let AI write the perfect reminder — polite, professional, and personalized.
+
+**How it works:**
+- Select an overdue invoice
+- Choose tone: **Polite** / **Firm** / **Final Notice**
+- AI generates a ready-to-send message for **Email** and **WhatsApp**
+- Edit if needed, then send with one click
+
+**Example output:**
+> *"Hi Rahul bhai, hope you're doing well! Just a quick reminder that Invoice #INV-0042 of ₹24,500 was due on April 10th. Please let me know if you need any clarification. Looking forward to your payment. Thanks!"*
+
+---
+
+### 3. 💡 Smart Item Suggestions
+
+Speed up invoice creation with AI-powered autocomplete.
+
+**How it works:**
+- Start typing an item name while creating an invoice
+- AI suggests matching items from your invoice history
+- Auto-fills rate, unit, HSN code, and tax rate
+- Saves time — especially for recurring clients with similar services
 
 ---
 
@@ -50,6 +99,7 @@ InvoiceFlow is a **production-ready SaaS tool** built for Indian freelancers. Sa
 | State | Zustand |
 | Forms | React Hook Form + Zod |
 | Charts | Recharts |
+| AI | Anthropic Claude API |
 | Deployment | Vercel |
 
 ---
@@ -66,12 +116,26 @@ invoiceflow/
 │   │   ├── expenses/        # Expense tracking
 │   │   ├── reports/         # Tax & earnings reports
 │   │   └── settings/        # User settings
-│   └── api/                 # API routes
+│   └── api/
+│       ├── invoices/        # Invoice API routes
+│       ├── clients/         # Client API routes
+│       ├── dashboard/       # Dashboard stats API
+│       └── ai/              # AI-powered API routes
+│           ├── chat/        # AI Invoice Assistant chatbot
+│           ├── reminder/    # AI payment reminder generator
+│           └── suggestions/ # Smart item suggestions
 ├── components/
 │   ├── ui/                  # shadcn components
-│   ├── invoices/            # Invoice-specific components
-│   └── dashboard/           # Dashboard widgets
-├── lib/                     # Business logic & utilities
+│   └── ai/                  # AI-powered components
+│       ├── AiChatbot.tsx    # Floating chat widget
+│       ├── ReminderComposer.tsx  # AI reminder UI
+│       └── ItemSuggestions.tsx   # Invoice item autocomplete
+├── lib/
+│   ├── auth.ts              # NextAuth config
+│   ├── prisma.ts            # Prisma client
+│   └── ai/                  # AI utilities
+│       ├── prompts.ts       # All AI prompts (centralized)
+│       └── client.ts        # Anthropic client setup
 ├── hooks/                   # Custom React hooks
 ├── store/                   # Zustand global state
 ├── types/                   # TypeScript interfaces
@@ -89,6 +153,7 @@ invoiceflow/
 - npm v10+
 - Git
 - Neon account (free) — [neon.tech](https://neon.tech)
+- Anthropic API key — [console.anthropic.com](https://console.anthropic.com)
 
 ### 1. Clone the repository
 
@@ -120,6 +185,7 @@ GOOGLE_CLIENT_SECRET="your-google-client-secret"
 RESEND_API_KEY="your-resend-api-key"
 RAZORPAY_KEY_ID="your-razorpay-key"
 RAZORPAY_KEY_SECRET="your-razorpay-secret"
+ANTHROPIC_API_KEY="your-anthropic-api-key"
 ```
 
 ### 4. Set up the database
@@ -153,11 +219,11 @@ Open [http://localhost:3000](http://localhost:3000) 🎉
 
 ## 💰 Pricing Plans
 
-| Plan | Price | Invoices |
-|------|-------|----------|
-| Free | ₹0/month | 3/month |
-| Pro | ₹199/month | Unlimited |
-| Agency | ₹499/month | Unlimited + Team |
+| Plan | Price | Invoices | AI Features |
+|------|-------|----------|-------------|
+| Free | ₹0/month | 3/month | ❌ |
+| Pro | ₹199/month | Unlimited | ✅ |
+| Agency | ₹499/month | Unlimited + Team | ✅ |
 
 ---
 
@@ -182,7 +248,7 @@ MIT License — see [LICENSE](./LICENSE) for details.
 
 ## 👨‍💻 Author
 
-Made with Ashutosh ❤️ for Indian freelancers.
+Made with ❤️ by Ashutosh for Indian freelancers.
 
 ---
 

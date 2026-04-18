@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { AiChatbot } from "@/components/ai/ai-chatbot";
 
 // ==========================================
 // NAV ITEMS
@@ -275,6 +276,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         className="min-h-screen pt-16 p-6">
         {children}
       </motion.main>
+      <AiChatbot/>
     </div>
   );
 }
