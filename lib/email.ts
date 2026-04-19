@@ -2,7 +2,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL = "InvoiceFlow <noreply@yourdomain.com>";
+const FROM_EMAIL = "InvoiceFlow <onboarding@resend.dev>";
 
 // ==========================================
 // WELCOME EMAIL

@@ -30,6 +30,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatCurrency, formatDate, getStatusColor, getStatusLabel } from "@/lib/utils";
+import { ReminderComposer } from "@/components/ai/reminder-composer";
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.07 } } };
@@ -148,6 +149,7 @@ export default function InvoiceDetailPage({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isSavingPayment, setIsSavingPayment] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const [payment, setPayment] = useState({
     amount: 0,
@@ -185,6 +187,46 @@ export default function InvoiceDetailPage({
       toast.error("Failed to delete invoice");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // ==========================================
+  // SEND INVOICE EMAIL
+  // ==========================================
+  const handleSendInvoice = async () => {
+    if (!invoice?.client.email) {
+      toast.error("Client email not found!");
+      return;
+    }
+    setIsSendingEmail(true);
+    try {
+      const res = await fetch("/api/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "invoice",
+          to: invoice.client.email,
+          clientName: invoice.client.name,
+          invoiceNumber: invoice.invoiceNumber,
+          amount: invoice.total,
+          dueDate: formatDate(invoice.dueDate),
+          invoiceUrl: `${window.location.origin}/dashboard/invoices/${invoice.id}`,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Invoice sent to client successfully! 📧");
+
+      // Status update to SENT
+      await fetch(`/api/invoices/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "SENT" }),
+      });
+      fetchInvoice();
+    } catch {
+      toast.error("Failed to send invoice email");
+    } finally {
+      setIsSendingEmail(false);
     }
   };
 
@@ -230,6 +272,9 @@ export default function InvoiceDetailPage({
   if (!invoice) return null;
 
   const isOverdue = invoice.status !== "PAID" && new Date(invoice.dueDate) < new Date();
+  const daysOverdue = isOverdue
+    ? Math.floor((new Date().getTime() - new Date(invoice.dueDate).getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
   const user = invoice.user;
 
   const upiUrl = user.upiId
@@ -266,12 +311,33 @@ export default function InvoiceDetailPage({
         </div>
 
         <motion.div variants={fadeUp} className="flex items-center gap-2 flex-wrap">
-          {/* Record Payment Dialog — triggered from sidebar button only */}
+
+          {/* ==========================================
+              SEND INVOICE BUTTON
+          ========================================== */}
+          {invoice.status !== "PAID" && invoice.status !== "CANCELLED" && invoice.client.email && (
+            <Button
+              onClick={handleSendInvoice}
+              disabled={isSendingEmail}
+              className="bg-[#1a472a] hover:bg-[#1a472a]/80 text-white gap-2"
+            >
+              {isSendingEmail ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" /> Send Invoice
+                </>
+              )}
+            </Button>
+          )}
+
+          {/* Record Payment Dialog */}
           {invoice.status !== "PAID" && invoice.status !== "CANCELLED" && (
             <Dialog open={isPaymentOpen} onOpenChange={setIsPaymentOpen}>
-              {/* ── UPDATED MODAL ─────────────────────────────────────────── */}
               <DialogContent className="bg-[#0a1a0f] border border-white/10 text-white max-w-md p-0 overflow-hidden">
-                {/* Modal Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
                   <div>
                     <DialogTitle className="text-white font-semibold text-base">
@@ -282,7 +348,6 @@ export default function InvoiceDetailPage({
                 </div>
 
                 <div className="px-5 py-4 space-y-4 overflow-y-auto">
-                  {/* Amount Due badge + Amount input */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <Label className="text-white/50 text-xs uppercase tracking-wide">Amount</Label>
@@ -306,7 +371,6 @@ export default function InvoiceDetailPage({
                     </div>
                   </div>
 
-                  {/* Method Tabs */}
                   <div className="space-y-1.5">
                     <Label className="text-white/50 text-xs uppercase tracking-wide">Payment Method</Label>
                     <div className="flex gap-2">
@@ -321,7 +385,6 @@ export default function InvoiceDetailPage({
                           <span className="hidden sm:inline text-xs">{m.label}</span>
                         </button>
                       ))}
-                      {/* Other methods compact dropdown */}
                       <select
                         value={["UPI","BANK_TRANSFER","CASH"].includes(payment.method) ? "" : payment.method}
                         onChange={(e) => e.target.value && setPayment((p) => ({ ...p, method: e.target.value as PaymentMethod }))}
@@ -338,7 +401,6 @@ export default function InvoiceDetailPage({
                     </div>
                   </div>
 
-                  {/* Method-specific content */}
                   <AnimatePresence mode="wait">
                     {payment.method === "UPI" && (
                       <motion.div key="upi"
@@ -372,7 +434,6 @@ export default function InvoiceDetailPage({
                             </p>
                           </div>
                         )}
-                        {/* Transaction ID */}
                         <div className="mt-3 space-y-1.5">
                           <Label className="text-white/50 text-xs uppercase tracking-wide">
                             Transaction ID <span className="text-white/20 normal-case">(optional)</span>
@@ -443,7 +504,6 @@ export default function InvoiceDetailPage({
                       </motion.div>
                     )}
 
-                    {/* Cheque / Card / Other — just transaction ID */}
                     {["CHEQUE","CARD","OTHER"].includes(payment.method) && (
                       <motion.div key="other"
                         initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
@@ -461,7 +521,6 @@ export default function InvoiceDetailPage({
                     )}
                   </AnimatePresence>
 
-                  {/* Payment Date */}
                   <div className="space-y-1.5">
                     <Label className="text-white/50 text-xs uppercase tracking-wide">Payment Date</Label>
                     <Input type="date" value={payment.paidAt}
@@ -469,7 +528,6 @@ export default function InvoiceDetailPage({
                       className="bg-white/5 border-white/10 text-white/80 focus:border-[#22c55e]/50 rounded-xl text-sm [color-scheme:dark]" />
                   </div>
 
-                  {/* Notes */}
                   <div className="space-y-1.5">
                     <Label className="text-white/50 text-xs uppercase tracking-wide">
                       Notes <span className="text-white/20 normal-case">(optional)</span>
@@ -481,7 +539,6 @@ export default function InvoiceDetailPage({
                   </div>
                 </div>
 
-                {/* Save Button — sticky bottom */}
                 <div className="px-5 pb-4 pt-2 border-t border-white/5 shrink-0">
                   <Button onClick={handleRecordPayment} disabled={isSavingPayment || payment.amount <= 0}
                     className="w-full bg-[#1a472a] hover:bg-[#1a472a]/80 text-white h-11 rounded-xl font-medium disabled:opacity-40">
@@ -496,7 +553,6 @@ export default function InvoiceDetailPage({
                   </Button>
                 </div>
               </DialogContent>
-              {/* ── END MODAL ─────────────────────────────────────────────── */}
             </Dialog>
           )}
 
@@ -712,8 +768,9 @@ export default function InvoiceDetailPage({
           )}
         </div>
 
-        {/* Right — Payment Status + History */}
+        {/* Right Sidebar */}
         <div className="space-y-5">
+          {/* Payment Status */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Card className="border border-white/5 bg-white/[0.02] rounded-2xl">
               <CardHeader>
@@ -751,6 +808,7 @@ export default function InvoiceDetailPage({
             </Card>
           </motion.div>
 
+          {/* Payment History */}
           {invoice.payments.length > 0 && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <Card className="border border-white/5 bg-white/[0.02] rounded-2xl">
@@ -775,6 +833,23 @@ export default function InvoiceDetailPage({
                   ))}
                 </CardContent>
               </Card>
+            </motion.div>
+          )}
+
+          {/* ==========================================
+              AI REMINDER COMPOSER
+          ========================================== */}
+          {(invoice.status === "SENT" || invoice.status === "OVERDUE" || invoice.status === "PARTIAL") &&
+            invoice.client.email && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+              <ReminderComposer
+                invoiceNumber={invoice.invoiceNumber}
+                clientName={invoice.client.name}
+                clientEmail={invoice.client.email}
+                amount={invoice.amountDue}
+                dueDate={formatDate(invoice.dueDate)}
+                daysOverdue={daysOverdue}
+              />
             </motion.div>
           )}
         </div>
