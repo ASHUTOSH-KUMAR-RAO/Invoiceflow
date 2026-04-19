@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -64,36 +63,54 @@ export function AiChatbot() {
   return (
     <>
       {/* Floating Button */}
-      <div className="fixed bottom-6 right-6 z-[9999]">
-        <Button
-          onClick={() => setOpen((prev) => !prev)}
-          className="w-14 h-14 rounded-full bg-[#22c55e] hover:bg-[#16a34a] text-black shadow-lg shadow-[#22c55e]/20"
-        >
-          <AnimatePresence mode="wait">
-            {open ? (
-              <motion.div
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <X className="w-5 h-5" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="open"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <MessageCircle className="w-5 h-5" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </Button>
-      </div>
+      <motion.button
+        onClick={() => setOpen((prev) => !prev)}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        style={{
+          position: "fixed",
+          bottom: "24px",
+          right: "24px",
+          zIndex: 99999,
+          width: "56px",
+          height: "56px",
+          borderRadius: "50%",
+          backgroundColor: "#22c55e",
+          border: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 24px rgba(34,197,94,0.25)",
+        }}
+      >
+        <AnimatePresence mode="wait">
+          {open ? (
+            <motion.div
+              key="close"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <X size={22} color="black" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="open"
+              initial={{ rotate: 90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: -90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <MessageCircle size={22} color="black" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
 
       {/* Chat Window */}
       <AnimatePresence>
@@ -103,7 +120,13 @@ export function AiChatbot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 z-[9999] w-[340px] sm:w-[380px]"
+            style={{
+              position: "fixed",
+              bottom: "90px",
+              right: "24px",
+              zIndex: 99999,
+              width: "360px",
+            }}
           >
             <div className="rounded-2xl border border-white/10 bg-[#0a0f0d] shadow-2xl overflow-hidden">
               {/* Header */}
@@ -181,14 +204,27 @@ export function AiChatbot() {
                   placeholder="Ask anything..."
                   className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-xl text-sm focus-visible:ring-[#22c55e]/30"
                 />
-                <Button
+                <motion.button
                   onClick={sendMessage}
                   disabled={loading || !input.trim()}
-                  size="icon"
-                  className="bg-[#22c55e] hover:bg-[#16a34a] text-black rounded-xl shrink-0 disabled:opacity-40"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "12px",
+                    backgroundColor: "#22c55e",
+                    border: "none",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    opacity: loading || !input.trim() ? 0.4 : 1,
+                  }}
                 >
-                  <Send className="w-4 h-4" />
-                </Button>
+                  <Send size={16} color="black" />
+                </motion.button>
               </div>
             </div>
           </motion.div>
